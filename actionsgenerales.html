@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="dataManager.js"></script>
+    <title>MARSA MAROC - Actions Générales</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --sidebar-width: 250px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar Styles */
+        #sidebar {
+            position: fixed;
+            width: var(--sidebar-width);
+            height: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            transition: all 0.3s;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+        }
+        
+        #sidebar .sidebar-header {
+            padding: 20px;
+            background-color: var(--dark-color);
+            text-align: center;
+        }
+        
+        #sidebar ul.components {
+            padding: 20px 0;
+        }
+        
+        #sidebar ul li a {
+            padding: 15px 20px;
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        #sidebar ul li a:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        #sidebar ul li.active > a {
+            background-color: var(--secondary-color);
+        }
+        
+        #content {
+            width: calc(100% - var(--sidebar-width));
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: all 0.3s;
+            min-height: 100vh;
+        }
+        
+        .dashboard-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            margin-bottom: 20px;
+            border: none;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .main-metric {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        .progress-card {
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 250px;
+        }
+        
+        .action-plan-item {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 15px 0;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .progress {
+            height: 10px;
+            margin: 15px 0;
+        }
+        
+        .category-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .category-btn {
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #dee2e6;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .category-btn.active, .category-btn:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+        
+        .action-card {
+            border-left: 4px solid;
+            transition: all 0.3s;
+        }
+        
+        .action-card:hover {
+            transform: translateX(5px);
+        }
+        
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 80px;
+                text-align: center;
+            }
+            
+            #sidebar .sidebar-header h3 {
+                display: none;
+            }
+            
+            #sidebar ul li a span {
+                display: none;
+            }
+            
+            #sidebar ul li a i {
+                margin-right: 0;
+                font-size: 1.5rem;
+            }
+            
+            #content {
+                width: calc(100% - 80px);
+                margin-left: 80px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <img src="marsamaroclogo.png" alt="MARSAMARSA MAROC Logo" style="max-width: 190px; max-height: 90px;">
+        </div>
+
+
+        <ul class="list-unstyled components">
+            <li>
+                <a href="code.html">
+                    <i class="fas fa-home"></i>
+                    <span>Accueil</span>
+                </a>
+            </li>
+            <li>
+                <a href="tdashboard.html">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li>
+                <a href="planactions.html">
+                    <i class="fas fa-tasks"></i>
+                    <span>Plan d'actions</span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="actionsgenerales.html">
+                    <i class="fas fa-list-alt"></i>
+                    <span>Actions Générales</span>
+                </a>
+            </li>
+            <li>
+                <a href="sittings.html">
+                    <i class="fas fa-cog"></i>
+                    <span>Options</span>
+                </a>
+            </li>
+            <li>
+                <a href="statistics.html">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Statistiques</span>
+                </a>
+            </li>
+            <li>
+                <a href="rapport.html">
+                    <i class="fas fa-file-export"></i>
+                    <span>Rapports</span>
+                </a>
+            </li>
+            <li>
+                <a href="profile.html">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profil</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Page Content -->
+    <div id="content">
+        <div class="dashboard-header">
+            <h2>Actions Générales - BU Maintenance</h2>
+            <p class="mb-0">Vue d'ensemble de toutes les actions de l'entreprise</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h5>Total des Actions</h5>
+                <div class="stat-value">127</div>
+                <p>Tous départements confondus</p>
+            </div>
+            <div class="stat-card">
+                <h5>Taux d'Avancement</h5>
+                <div class="stat-value">68%</div>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 68%" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <h5>Actions en Retard</h5>
+                <div class="stat-value" style="color: #e74c3c;">23</div>
+                <p>18% du total</p>
+            </div>
+            <div class="stat-card">
+                <h5>Actions Clôturées</h5>
+                <div class="stat-value" style="color: #2ecc71;">64</div>
+                <p>50% du total</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Répartition des Actions par Département</h5>
+                        <div class="chart-container">
+                            <canvas id="departmentChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Statut des Actions</h5>
+                        <div class="chart-container">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Filtres par Catégorie</h5>
+                        <div class="category-filter">
+                            <div class="category-btn active" data-category="Toutes">Toutes</div>
+                            <div class="category-btn" data-category="Maintenance">Maintenance</div>
+                            <div class="category-btn" data-category="Sécurité">Sécurité</div>
+                            <div class="category-btn" data-category="Formation">Formation</div>
+                            <div class="category-btn" data-category="Optimisation">Optimisation</div>
+                            <div class="category-btn" data-category="Audit">Audit</div>
+                            <div class="category-btn" data-category="Équipement">Équipement</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4" id="action-cards-container">
+            <div class="col-md-6 col-lg-4 action-item" data-category="Maintenance">
+                <div class="card action-card" style="border-left-color: #3498db;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="card-title">Mise à jour systèmes</h5>
+                            <span class="badge bg-primary">Maintenance</span>
+                        </div>
+                        <p class="card-text">Mise à jour des systèmes de contrôle des équipements principaux</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted">Responsable: </span>
+                                <span>Jean Dupont</span>
+                            </div>
+                            <span class="badge bg-info">En cours</span>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <small>Échéance: 15/12/2023</small>
+                            <small>65%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 action-item" data-category="Sécurité">
+                <div class="card action-card" style="border-left-color: #2ecc71;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="card-title">Audit sécurité</h5>
+                            <span class="badge bg-success">Sécurité</span>
+                        </div>
+                        <p class="card-text">Audit complet des procédures de sécurité sur tous les sites</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted">Responsable: </span>
+                                <span>Marie Lambert</span>
+                            </div>
+                            <span class="badge bg-success">Terminé</span>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <small>Échéance: 30/09/2023</small>
+                            <small>100%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 action-item" data-category="Formation">
+                <div class="card action-card" style="border-left-color: #e74c3c;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="card-title">Formation nouvelles tech</h5>
+                            <span class="badge bg-danger">Formation</span>
+                        </div>
+                        <p class="card-text">Formation des équipes aux nouvelles technologies implémentées</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted">Responsable: </span>
+                                <span>Pierre Martin</span>
+                            </div>
+                            <span class="badge bg-warning text-dark">En retard</span>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: 35%" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <small>Échéance: 15/10/2023</small>
+                            <small>35%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 action-item" data-category="Optimisation">
+                <div class="card action-card" style="border-left-color: #f39c12;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="card-title">Optimisation processus</h5>
+                            <span class="badge bg-warning text-dark">Optimisation</span>
+                        </div>
+                        <p class="card-text">Révision et optimisation des processus de maintenance préventive</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted">Responsable: </span>
+                                <span>Sophie Leroux</span>
+                            </div>
+                            <span class="badge bg-info">En cours</span>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar" role="progressbar" style="width: 80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <small>Échéance: 30/11/2023</small>
+                            <small>80%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 action-item" data-category="Audit">
+                <div class="card action-card" style="border-left-color: #9b59b6;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="card-title">Audit qualité</h5>
+                            <span class="badge bg-purple">Audit</span>
+                        </div>
+                        <p class="card-text">Audit qualité des procédures et résultats de maintenance</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted">Responsable: </span>
+                                <span>Thomas Bernard</span>
+                            </div>
+                            <span class="badge bg-secondary">Planifié</span>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar bg-secondary" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <small>Échéance: 15/01/2024</small>
+                            <small>10%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 action-item" data-category="Équipement">
+                <div class="card action-card" style="border-left-color: #1abc9c;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="card-title">Nouveaux équipements</h5>
+                            <span class="badge bg-info">Équipement</span>
+                        </div>
+                        <p class="card-text">Acquisition et installation de nouveaux équipements de test</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted">Responsable: </span>
+                                <span>Lucie Petit</span>
+                            </div>
+                            <span class="badge bg-info">En cours</span>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar" role="progressbar" style="width: 45%" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <small>Échéance: 28/02/2024</small>
+                            <small>45%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1">Précédent</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Suivant</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <footer>
+            <p>MARSAMARSA MAROC &copy; 2023 - Tous droits réservés</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Department Chart
+            const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+            const departmentChart = new Chart(departmentCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Maintenance', 'Production', 'Qualité', 'Logistique', 'RH', 'IT'],
+                    datasets: [{
+                        label: 'Nombre d\'Actions',
+                        data: [45, 32, 18, 15, 9, 8],
+                        backgroundColor: [
+                            '#3498db',
+                            '#2ecc71',
+                            '#e74c3c',
+                            '#f39c12',
+                            '#9b59b6',
+                            '#1abc9c'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Status Chart
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            const statusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Terminé', 'En Cours', 'En Retard', 'Planifié'],
+                    datasets: [{
+                        data: [64, 40, 23, 20],
+                        backgroundColor: [
+                            '#2ecc71',
+                            '#3498db',
+                            '#e74c3c',
+                            '#95a5a6'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // Category filter functionality
+            const categoryButtons = document.querySelectorAll('.category-btn');
+            const actionItems = document.querySelectorAll('.action-item');
+
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    categoryButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const selectedCategory = this.dataset.category;
+
+                    actionItems.forEach(item => {
+                        const itemCategory = item.dataset.category;
+                        if (selectedCategory === 'Toutes' || itemCategory === selectedCategory) {
+                            item.style.display = 'block'; // Show the action item
+                        } else {
+                            item.style.display = 'none'; // Hide the action item
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

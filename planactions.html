@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MARSA MAROC - Plan d'Actions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --sidebar-width: 250px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar Styles */
+        #sidebar {
+            position: fixed;
+            width: var(--sidebar-width);
+            height: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            transition: all 0.3s;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+        }
+        
+        #sidebar .sidebar-header {
+            padding: 20px;
+            background-color: var(--dark-color);
+            text-align: center;
+        }
+        
+        #sidebar ul.components {
+            padding: 20px 0;
+        }
+        
+        #sidebar ul li a {
+            padding: 15px 20px;
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        #sidebar ul li a:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        #sidebar ul li.active > a {
+            background-color: var(--secondary-color);
+        }
+        
+        #content {
+            width: calc(100% - var(--sidebar-width));
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: all 0.3s;
+            min-height: 100vh;
+        }
+        
+        .dashboard-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            margin-bottom: 20px;
+            border: none;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .main-metric {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        .progress-card {
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 250px;
+        }
+        
+        .action-plan-item {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 15px 0;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .progress {
+            height: 10px;
+            margin: 15px 0;
+        }
+        
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background-color: #e9ecef;
+            z-index: 1;
+        }
+        
+        .timeline-item {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .timeline-point {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #3498db;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 80px;
+                text-align: center;
+            }
+            
+            #sidebar .sidebar-header h3 {
+                display: none;
+            }
+            
+            #sidebar ul li a span {
+                display: none;
+            }
+            
+            #sidebar ul li a i {
+                margin-right: 0;
+                font-size: 1.5rem;
+            }
+            
+            #content {
+                width: calc(100% - 80px);
+                margin-left: 80px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <img src="marsamaroclogo.png" alt="MARSAMARSA MAROC Logo" style="max-width: 190px; max-height: 90px;">
+        </div>
+
+
+        <ul class="list-unstyled components">
+            <li>
+                <a href="code.html">
+                    <i class="fas fa-home"></i>
+                    <span>Accueil</span>
+                </a>
+            </li>
+            <li>
+                <a href="dashboard.html">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="planactions.html">
+                    <i class="fas fa-tasks"></i>
+                    <span>Plan d'actions</span>
+                </a>
+            </li>
+            <li>
+                <a href="actionsgenerales.html">
+                    <i class="fas fa-list-alt"></i>
+                    <span>Actions Générales</span>
+                </a>
+            </li>
+            <li>
+                <a href="sittings.html">
+                    <i class="fas fa-cog"></i>
+                    <span>Options</span>
+                </a>
+            </li>
+            <li>
+                <a href="statistics.html">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Statistiques</span>
+                </a>
+            </li>
+            <li>
+                <a href="rapport.html">
+                    <i class="fas fa-file-export"></i>
+                    <span>Rapports</span>
+                </a>
+            </li>
+            <li>
+                <a href="profile.html">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profil</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Page Content -->
+    <div id="content">
+        <div class="dashboard-header">
+            <h2>Plan d'Actions - BU Maintenance</h2>
+            <p class="mb-0">Suivi détaillé des actions et leur avancement</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h5>Total des Actions</h5>
+                <div class="stat-value" id="totalActions">30</div>
+                <p>30,0_PMO</p>
+            </div>
+            <div class="stat-card">
+                <h5>Avancement Planifié</h5>
+                <div class="stat-value" id="plannedOverallProgress">41%</div>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" id="plannedProgressBar" style="width: 41%" aria-valuenow="41" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <h5>Avancement Réel</h5>
+                <div class="stat-value" id="actualOverallProgress">40.5%</div>
+                <div class="progress">
+                    <div class="progress-bar bg-success" role="progressbar" id="actualProgressBar" style="width: 40.5%" aria-valuenow="40.5" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <h5>Jours Restants</h5>
+                <div class="stat-value" id="daysRemaining">184</div>
+                <p>Moyenne par action</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Avancement Planifié par Action</h5>
+                        <div class="chart-container">
+                            <canvas id="plannedProgressChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Avancement Réel par Action</h5>
+                        <div class="chart-container">
+                            <canvas id="actualProgressChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Calendrier des Échéances</h5>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-point">1</div>
+                                <div>Q1</div>
+                                <small>5 actions</small>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-point">2</div>
+                                <div>Q2</div>
+                                <small>8 actions</small>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-point">3</div>
+                                <div>Q3</div>
+                                <small>10 actions</small>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-point">4</div>
+                                <div>Q4</div>
+                                <small>7 actions</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Détail des Actions</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Description Décision / Action</th>
+                                        <th>Resp.</th>
+                                        <th>Date Début</th>
+                                        <th>Date Fin</th>
+                                        <th>Durée (j)</th>
+                                        <th>Situation</th>
+                                        <th>Av. Planifié</th>
+                                        <th>Av. Réel</th>
+                                        <th>Commentaire</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="actionsTableBody">
+                                    <tr>
+                                        <td>1</td>
+                                        <td>Mise à jour des systèmes de contrôle</td>
+                                        <td>Jean Dupont</td>
+                                        <td>01-jan-25</td>
+                                        <td>31-déc-25</td>
+                                        <td>364</td>
+                                        <td><span class="badge bg-warning text-dark">Retard</span></td>
+                                        <td>41%</td>
+                                        <td>40%</td>
+                                        <td>Retard dans la livraison des composants</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>Optimisation des processus de maintenance</td>
+                                        <td>Marie Lambert</td>
+                                        <td>01-jan-25</td>
+                                        <td>31-déc-25</td>
+                                        <td>364</td>
+                                        <td><span class="badge bg-warning text-dark">Retard</span></td>
+                                        <td>41%</td>
+                                        <td>22%</td>
+                                        <td>Formation de l'équipe en cours</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>Installation nouveaux équipements</td>
+                                        <td>Pierre Martin</td>
+                                        <td>01-nov-25</td>
+                                        <td>31-déc-25</td>
+                                        <td>60</td>
+                                        <td><span class="badge bg-secondary">Non démarré</span></td>
+                                        <td>0%</td>
+                                        <td>0%</td>
+                                        <td>En attente de validation budget</td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td>Audit de sécurité des installations</td>
+                                        <td>Sophie Leroux</td>
+                                        <td>01-jan-25</td>
+                                        <td>31-déc-25</td>
+                                        <td>364</td>
+                                        <td><span class="badge bg-success">Clôture</span></td>
+                                        <td>100%</td>
+                                        <td>100%</td>
+                                        <td>Action terminée avec succès</td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td>Formation des techniciens nouvelles technologies</td>
+                                        <td>Thomas Bernard</td>
+                                        <td>01-mar-25</td>
+                                        <td>30-juin-25</td>
+                                        <td>121</td>
+                                        <td><span class="badge bg-info">En cours</span></td>
+                                        <td>65%</td>
+                                        <td>70%</td>
+                                        <td>Avancement conforme au planning</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Répartition par Responsable</h5>
+                        <div class="chart-container">
+                            <canvas id="responsibleChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Nouvelle Action</h5>
+                        <form id="newActionForm">
+                            <div class="mb-3">
+                                <label for="actionDescription" class="form-label">Description</label>
+                                <input type="text" class="form-control" id="actionDescription" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="actionResponsible" class="form-label">Responsable</label>
+                                <select class="form-select" id="actionResponsible" required>
+                                    <option value="" selected disabled>Sélectionner...</option>
+                                    <option value="Jean Dupont">Jean Dupont</option>
+                                    <option value="Marie Lambert">Marie Lambert</option>
+                                    <option value="Pierre Martin">Pierre Martin</option>
+                                    <option value="Sophie Leroux">Sophie Leroux</option>
+                                    <option value="Thomas Bernard">Thomas Bernard</option>
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="startDate" class="form-label">Date de Début</label>
+                                        <input type="date" class="form-control" id="startDate" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="endDate" class="form-label">Date de Fin</label>
+                                        <input type="date" class="form-control" id="endDate" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Ajouter l'action</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>MARSAMARSA MAROC &copy; 2025 - Tous droits réservés</p>
+        </footer>
+    </div>
+
+    <script>
+        // Global variables for charts to easily update them
+        let plannedChart;
+        let actualChart;
+        let responsibleChart;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const actionsTableBody = document.getElementById('actionsTableBody');
+            const newActionForm = document.getElementById('newActionForm');
+
+            // Initial chart setup
+            function initializeCharts() {
+                const plannedCtx = document.getElementById('plannedProgressChart').getContext('2d');
+                plannedChart = new Chart(plannedCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Action 1', 'Action 2', 'Action 3', 'Action 4', 'Action 5'],
+                        datasets: [{
+                            label: 'Avancement Planifié (%)',
+                            data: [41, 41, 0, 100, 65],
+                            backgroundColor: '#3498db',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+                
+                const actualCtx = document.getElementById('actualProgressChart').getContext('2d');
+                actualChart = new Chart(actualCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Action 1', 'Action 2', 'Action 3', 'Action 4', 'Action 5'],
+                        datasets: [{
+                            label: 'Avancement Réel (%)',
+                            data: [40, 22, 0, 100, 70],
+                            backgroundColor: '#2ecc71',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+                
+                const responsibleCtx = document.getElementById('responsibleChart').getContext('2d');
+                responsibleChart = new Chart(responsibleCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Jean Dupont', 'Marie Lambert', 'Pierre Martin', 'Sophie Leroux', 'Thomas Bernard'],
+                        datasets: [{
+                            data: [5, 8, 3, 7, 7], // Placeholder data
+                            backgroundColor: [
+                                '#3498db',
+                                '#2ecc71',
+                                '#e74c3c',
+                                '#f39c12',
+                                '#9b59b6'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            }
+                        }
+                    }
+                });
+
+                updateOverallStats(); // Call this to ensure initial stats are correct based on current table data
+            }
+
+            // Function to calculate duration between two dates
+            function calculateDuration(startDateStr, endDateStr) {
+                const start = new Date(startDateStr);
+                const end = new Date(endDateStr);
+                if (isNaN(start.getTime()) || isNaN(end.getTime()) || start > end) {
+                    return 0; // Invalid dates
+                }
+                const diffTime = Math.abs(end - start);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                return diffDays;
+            }
+
+            // Function to update overall statistics (Total Actions, Avg Progress, etc.)
+            function updateOverallStats() {
+                const rows = actionsTableBody.querySelectorAll('tr');
+                let totalActionsCount = rows.length;
+                let totalPlannedProgress = 0;
+                let totalActualProgress = 0;
+                let totalDuration = 0;
+                let activeActionsCount = 0; // For average days remaining
+
+                rows.forEach(row => {
+                    const plannedProgressText = row.children[7].textContent.replace('%', '');
+                    const actualProgressText = row.children[8].textContent.replace('%', '');
+                    const durationText = row.children[5].textContent;
+
+                    totalPlannedProgress += parseFloat(plannedProgressText) || 0;
+                    totalActualProgress += parseFloat(actualProgressText) || 0;
+                    
+                    const duration = parseInt(durationText) || 0;
+                    totalDuration += duration;
+
+                    // For days remaining, we'll need to know remaining for 'En cours' or 'Non démarré'
+                    // For simplicity, we'll just sum all durations for now.
+                    // A more accurate "days remaining" would require specific start/end dates for each action and current date.
+                    // Here, we just count actions for average.
+                    const statusText = row.children[6].querySelector('.badge').textContent;
+                    if (statusText === 'En cours' || statusText === 'Non démarré' || statusText === 'Retard') {
+                        activeActionsCount++;
+                    }
+                });
+
+                const avgPlannedProgress = totalActionsCount > 0 ? (totalPlannedProgress / totalActionsCount).toFixed(1) : 0;
+                const avgActualProgress = totalActionsCount > 0 ? (totalActualProgress / totalActionsCount).toFixed(1) : 0;
+                const avgDaysRemaining = activeActionsCount > 0 ? (totalDuration / activeActionsCount).toFixed(0) : 0; // Simplified
+
+                document.getElementById('totalActions').textContent = totalActionsCount;
+                document.getElementById('plannedOverallProgress').textContent = `${avgPlannedProgress}%`;
+                document.getElementById('plannedProgressBar').style.width = `${avgPlannedProgress}%`;
+                document.getElementById('plannedProgressBar').setAttribute('aria-valuenow', avgPlannedProgress);
+
+                document.getElementById('actualOverallProgress').textContent = `${avgActualProgress}%`;
+                document.getElementById('actualProgressBar').style.width = `${avgActualProgress}%`;
+                document.getElementById('actualProgressBar').setAttribute('aria-valuenow', avgActualProgress);
+                
+                document.getElementById('daysRemaining').textContent = avgDaysRemaining;
+
+                updateChartData();
+            }
+
+            // Function to update chart data based on current table content
+            function updateChartData() {
+                const rows = actionsTableBody.querySelectorAll('tr');
+                const actionLabels = [];
+                const plannedData = [];
+                const actualData = [];
+                const responsibleCounts = {};
+
+                rows.forEach((row, index) => {
+                    const description = row.children[1].textContent;
+                    const planned = parseFloat(row.children[7].textContent.replace('%', '')) || 0;
+                    const actual = parseFloat(row.children[8].textContent.replace('%', '')) || 0;
+                    const responsible = row.children[2].textContent;
+
+                    actionLabels.push(`Action ${index + 1}`); // Use generic label or actual description
+                    plannedData.push(planned);
+                    actualData.push(actual);
+
+                    responsibleCounts[responsible] = (responsibleCounts[responsible] || 0) + 1;
+                });
+
+                // Update Planned Progress Chart
+                plannedChart.data.labels = actionLabels;
+                plannedChart.data.datasets[0].data = plannedData;
+                plannedChart.update();
+
+                // Update Actual Progress Chart
+                actualChart.data.labels = actionLabels;
+                actualChart.data.datasets[0].data = actualData;
+                actualChart.update();
+
+                // Update Responsible Chart
+                responsibleChart.data.labels = Object.keys(responsibleCounts);
+                responsibleChart.data.datasets[0].data = Object.values(responsibleCounts);
+                responsibleChart.update();
+            }
+
+
+            // Form submission handler
+            newActionForm.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent default form submission
+
+                const description = document.getElementById('actionDescription').value;
+                const responsible = document.getElementById('actionResponsible').value;
+                const startDateStr = document.getElementById('startDate').value;
+                const endDateStr = document.getElementById('endDate').value;
+
+                if (!description || !responsible || !startDateStr || !endDateStr) {
+                    alert("Veuillez remplir tous les champs de l'action.");
+                    return;
+                }
+
+                const newActionNo = actionsTableBody.children.length + 1;
+                const duration = calculateDuration(startDateStr, endDateStr);
+                const formattedStartDate = new Date(startDateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/\./g, '-');
+                const formattedEndDate = new Date(endDateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/\./g, '-');
+
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${newActionNo}</td>
+                    <td>${description}</td>
+                    <td>${responsible}</td>
+                    <td>${formattedStartDate}</td>
+                    <td>${formattedEndDate}</td>
+                    <td>${duration}</td>
+                    <td><span class="badge bg-secondary">Non démarré</span></td>
+                    <td>0%</td>
+                    <td>0%</td>
+                    <td></td>
+                `;
+                actionsTableBody.appendChild(newRow);
+
+                // Clear the form fields
+                newActionForm.reset();
+                document.getElementById('actionResponsible').value = ""; // Explicitly reset select
+
+                // Update the dashboard statistics and charts
+                updateOverallStats();
+            });
+
+            // Initialize charts and stats on page load
+            initializeCharts();
+            updateOverallStats(); // Initial call to calculate stats based on existing table data
+        });
+    </script>
+</body>
+</html>
